@@ -1,0 +1,80 @@
+.header {
+  padding: 20px;
+  background: linear-gradient(135deg, #032541, #06517e);
+  border-bottom: 1px solid #022664;
+  margin-bottom: 20px;
+}
+
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.link {
+  font-size: 12px;
+  font-weight: 500;
+  color: #eff7ff;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #9dc5ec;
+}
+
+.logowrp {
+  display: flex;
+  flex-direction: column;
+}
+
+.form {
+  width: 100%;
+  max-width: 480px;
+}
+
+.inputGroup {
+  display: flex;
+  width: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(3, 37, 65, 0.12);
+  background-color: #fff;
+}
+
+.input {
+  flex-grow: 1;
+  padding: 12px 16px;
+  border: none;
+  font-size: 16px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: rgba(3, 37, 65, 0.9);
+  background: transparent;
+}
+
+.input:focus {
+  outline: none;
+}
+
+.button {
+  padding: 0 20px;
+  background: linear-gradient(135deg, #074579, #06517e);
+  border: none;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.button:hover {
+  background: linear-gradient(135deg, #0d253f, #0084a8);
+  box-shadow: 0 6px 18px rgba(1, 180, 228, 0.4);
+}

@@ -1,0 +1,13 @@
+.header {
+  display: inline-block;
+  box-sizing: content-box;
+  padding: 12px;
+  margin: 12px 32px;
+  background-color: transparent;
+  border-radius: 18px;
+  color: azure;
+  text-shadow: 1px 1px 2px black, /* тінь знизу справа */ -1px -1px 2px black,
+    /* тінь зверху зліва */ 1px -1px 2px black,
+    /* тінь зверху справа */ -1px 1px 2px black; /* тінь знизу зліва */
+  font-weight: 100;
+}
