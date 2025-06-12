@@ -1,60 +1,55 @@
 import css from "./App.module.css";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import SearchBar from "../SearchBar/SearchBar";
 import { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import ReactPaginate from "react-paginate";
-import type { Movie } from "../../types/movie";
-import fetchMovies from "../../services/movieService";
+
+import SearchBar from "../SearchBar/SearchBar";
 import MovieGrid from "../MovieGrid/MovieGrid";
 import MovieModal from "../MovieModal/MovieModal";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import RandomBackdrop from "../RandomBackdrop/RandomBackdrop";
-import { getRandomBackdropUrl } from "../../services/getRandomBackdrop";
 import Loader from "../Loader/Loader";
 import MainHeader from "../MainHeader/MainHeader";
-// import Modal from "../Common/Modal";
+
+import { fetchMoviesBySearch } from "../../services/movieService";
+import { getRandomBackdropUrl } from "../../services/getRandomBackdrop";
+import type { Movie } from "../../types/movie";
 
 export default function App() {
-  //STATES
-  const [query, setQuery] = useState<string>("");
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [query, setQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
-  const [backGround, setBackground] = useState<string | null>(null);
+  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
 
-  //SEARCHING AND RENDERING MOVIES BY QUERY
-  const { data, isError, isLoading, isSuccess } = useQuery({
+  // TMDB fetch
+  const {
+    data,
+    isError,
+    isLoading,
+    isSuccess,
+  } = useQuery({
     queryKey: ["movies", query, currentPage],
-    queryFn: () => fetchMovies(query, currentPage),
+    queryFn: () => fetchMoviesBySearch({ query, page: currentPage }),
     enabled: !!query,
     retry: false,
     placeholderData: keepPreviousData,
   });
-  const movies = data?.results;
+
+  const movies = data?.results ?? [];
   const totalPages = data?.total_pages ?? 0;
 
   useEffect(() => {
-    if (data?.page) setCurrentPage(data?.page);
-  }, [data?.page]);
-
-  useEffect(() => {
-    if (isSuccess && movies?.length === 0) {
+    if (isSuccess && movies.length === 0) {
       toast("No movies found for your request.", { icon: "😞" });
-      console.log(movies);
     }
   }, [isSuccess, movies]);
 
-  //MOVIECARD MODAL WINDOW OPTIONS
-  const openModal = (): void => setIsModalOpen(true);
-  const closeModal = (): void => setIsModalOpen(false);
-
-  //FETCH RANDOM POSTERS FOR PAGE BACKDROP
-
+  // Background image preload
   const bgQuery = useQuery({
-    queryKey: ["bg"],
+    queryKey: ["backdrop"],
     queryFn: getRandomBackdropUrl,
-    enabled: movies && movies.length === 0,
+    enabled: movies.length === 0,
     refetchInterval: 8000,
   });
 
@@ -62,46 +57,24 @@ export default function App() {
     if (!bgQuery.data) return;
     const img = new Image();
     img.src = bgQuery.data;
-    img.onload = () => setBackground(bgQuery.data);
+    img.onload = () => setBackgroundUrl(bgQuery.data);
   }, [bgQuery.data]);
 
-  //MARKUP
   return (
     <>
-      <div>
-        <Toaster />
-      </div>
-
-      {/* --------------LOADER-------------- */}
+      <Toaster />
 
       {isLoading && <Loader />}
 
-      {/* --------------BACKGROUND-------------- */}
-
-      {backGround && movies && movies?.length === 0 && (
-        <RandomBackdrop bgUrl={backGround} />
-      )}
-
-      {/* --------------SEARCHBAR-------------- */}
-      <>
-        <SearchBar onSubmit={(query) => setQuery(query)} />
-      </>
-
-      {/* -------------ERRORMESSAGE--------------- */}
+      <SearchBar onSubmit={(query) => {
+        setQuery(query);
+        setCurrentPage(1);
+      }} />
 
       {query && isError && <ErrorMessage />}
 
-      {/* --------------MOVIEGRID-------------- */}
-
-      {query && movies && movies?.length > 0 ? (
-        <>
-          <MovieGrid
-            movies={movies}
-            onSelect={(movie) => {
-              setSelectedMovie(movie);
-              openModal();
-            }}
-          />
+      {query && movies.length > 0 ? (
+        <section className={css.gallerySection}>
           {totalPages > 1 && (
             <ReactPaginate
               pageCount={totalPages}
@@ -115,23 +88,23 @@ export default function App() {
               previousLabel="←"
             />
           )}
-        </>
+
+          <MovieGrid
+            movies={movies}
+            onSelect={(movie) => setSelectedMovie(movie)}
+          />
+        </section>
       ) : (
         <>
           <MainHeader />
-          {backGround && <RandomBackdrop bgUrl={backGround} />}
+          {backgroundUrl && <RandomBackdrop bgUrl={backgroundUrl} />}
         </>
       )}
 
-      {/* -------------MODAL---------------- */}
-
-      {isModalOpen && selectedMovie && (
+      {selectedMovie && (
         <MovieModal
           movie={selectedMovie}
-          onClose={() => {
-            closeModal();
-            setSelectedMovie(null);
-          }}
+          onClose={() => setSelectedMovie(null)}
         />
       )}
     </>

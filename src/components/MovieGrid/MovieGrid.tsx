@@ -1,41 +1,38 @@
-import css from "./MovieGrid.module.css";
 import type { Movie } from "../../types/movie";
-import noimage from "/src/assets/noimage.jpg";
+import css from "./MovieGrid.module.css";
+import noImage from "/src/assets/noimage.jpg";
 
 interface MovieGridProps {
-  onSelect: (movie: Movie) => void;
   movies: Movie[];
+  onSelect: (movie: Movie) => void;
 }
 
-export default function MovieGrid({ onSelect, movies }: MovieGridProps) {
+export default function MovieGrid({ movies, onSelect }: MovieGridProps) {
   return (
     <ul className={css.grid}>
-      {movies.map((movie) => {
-        const { id, poster_path, title } = movie;
-
-        return (
-          <li key={id}>
-            <div
-              className={css.card}
-              onClick={() => onSelect(movie)}
-              role="button"
-              tabIndex={0}
-            >
-              <img
-                className={css.image}
-                src={
-                  poster_path
-                    ? `https://image.tmdb.org/t/p/w500/${poster_path}`
-                    : noimage
-                }
-                alt={title}
-                loading="lazy"
-              />
-              <h2 className={css.title}>{title}</h2>
-            </div>
-          </li>
-        );
-      })}
+      {movies.map((movie) => (
+        <li key={movie.id} className={css.cardWrapper}>
+          <div
+            className={css.card}
+            role="button"
+            tabIndex={0}
+            onClick={() => onSelect(movie)}
+            onKeyDown={(e) => e.key === "Enter" && onSelect(movie)}
+          >
+            <img
+              className={css.image}
+              src={
+                movie.poster_path
+                  ? `https://image.tmdb.org/t/p/w500/${movie.poster_path}`
+                  : noImage
+              }
+              alt={movie.title}
+              loading="lazy"
+            />
+            <h2 className={css.title}>{movie.title}</h2>
+          </div>
+        </li>
+      ))}
     </ul>
   );
 }

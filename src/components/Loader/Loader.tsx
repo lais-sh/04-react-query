@@ -1,10 +1,9 @@
 import css from "./Loader.module.css";
-import { BeatLoader } from "react-spinners";
 
 export default function Loader() {
   return (
-    <div>
-      <BeatLoader className={css.loader} color="white" />
+    <div className={css.wrapper}>
+      <p className={css.text}>Loading movies, please wait...</p>
     </div>
   );
 }
