@@ -1,12 +1,13 @@
-.wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-}
-
-.text {
-  font-size: 18px;
-  color: #d32f2f;
+.message {
+  color: #b91c1c;
+  font-size: 17px;
   font-weight: 500;
+  text-align: center;
+  margin: 32px auto;
+  padding: 12px 20px;
+  max-width: 480px;
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }

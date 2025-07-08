@@ -1,13 +1,21 @@
-import css from "./RandomBackdrop.module.css";
+import { memo } from "react";
+import styles from "./RandomBackdrop.module.css";
+import "animate.css";
 
 interface RandomBackdropProps {
-  bgUrl: string;
+  bgUrl: string | null;
 }
 
-export default function RandomBackdrop({ bgUrl }: RandomBackdropProps) {
+const RandomBackdrop = memo(({ bgUrl }: RandomBackdropProps) => {
+  if (!bgUrl) return null;
+
   return (
-    <div className={css.backdrop} style={{ backgroundImage: `url(${bgUrl})` }}>
-      {/* Забрали зайвий текст */}
-    </div>
+    <div
+      className={`${styles.backdrop} animate__animated animate__fadeIn`}
+      style={{ backgroundImage: `url("${bgUrl}")` }}
+      aria-hidden="true"
+    />
   );
-}
+});
+
+export default RandomBackdrop;

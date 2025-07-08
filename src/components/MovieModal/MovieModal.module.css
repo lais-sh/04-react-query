@@ -1,50 +1,71 @@
 .overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+  inset: 0;
+  background-color: rgba(20, 20, 20, 0.8);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
 }
 
-.modal {
-  background-color: #ffffff;
-  border-radius: 10px;
-  padding: 24px;
+.dialog {
+  background-color: #121212;
+  color: #f0f0f0;
+  border-radius: 12px;
   max-width: 700px;
-  width: 90%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  position: relative;
+  width: 92%;
   overflow: hidden;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+  position: relative;
+  animation: fadeIn 0.3s ease-out;
 }
 
-.closeBtn {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  background: none;
-  border: none;
-  font-size: 28px;
-  color: #333;
-  cursor: pointer;
-}
-
-.image {
+.poster {
   width: 100%;
   height: auto;
-  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .details {
-  margin-top: 16px;
+  padding: 24px;
+  line-height: 1.5;
 }
 
-.title {
+.details h2 {
+  font-size: 26px;
+  margin-bottom: 14px;
+}
+
+.details p {
+  font-size: 15px;
   margin-bottom: 10px;
-  font-size: 24px;
-  font-weight: bold;
+  color: #d0d0d0;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #f0f0f0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.close:hover {
+  transform: rotate(90deg);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

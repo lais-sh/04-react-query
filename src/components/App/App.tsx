@@ -1,112 +1,98 @@
-import css from "./App.module.css";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
-import toast, { Toaster } from "react-hot-toast";
-import ReactPaginate from "react-paginate";
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import ReactPaginate from 'react-paginate';
+import { Toaster, toast } from 'react-hot-toast';
 
-import SearchBar from "../SearchBar/SearchBar";
-import MovieGrid from "../MovieGrid/MovieGrid";
-import MovieModal from "../MovieModal/MovieModal";
-import ErrorMessage from "../ErrorMessage/ErrorMessage";
-import RandomBackdrop from "../RandomBackdrop/RandomBackdrop";
-import Loader from "../Loader/Loader";
-import MainHeader from "../MainHeader/MainHeader";
+import SearchBar from '../SearchBar/SearchBar';
+import MovieGrid from '../MovieGrid/MovieGrid';
+import MovieModal from '../MovieModal/MovieModal';
+import Loader from '../Loader/Loader';
+import ErrorMessage from '../ErrorMessage/ErrorMessage';
+import RandomBackdrop from '../RandomBackdrop/RandomBackdrop';
 
-import { fetchMoviesBySearch } from "../../services/movieService";
-import { getRandomBackdropUrl } from "../../services/getRandomBackdrop";
-import type { Movie } from "../../types/movie";
+import { fetchMovies } from '../../services/movieService';
+import { getRandomBackdropUrl } from '../../services/getRandomBackdrop';
+import type { Movie } from '../../types/movie';
+
+import css from './App.module.css';
 
 export default function App() {
-  const [query, setQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
-  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [activeMovie, setActiveMovie] = useState<Movie | null>(null);
+  const [backdrop, setBackdrop] = useState<string | null>(null);
 
-  // TMDB fetch
-  const {
-    data,
-    isError,
-    isLoading,
-    isSuccess,
-  } = useQuery({
-    queryKey: ["movies", query, currentPage],
-    queryFn: () => fetchMoviesBySearch({ query, page: currentPage }),
+  const { data, isPending, isError } = useQuery({
+    queryKey: ['movies', query, page],
+    queryFn: () => fetchMovies({ query, page }),
     enabled: !!query,
-    retry: false,
-    placeholderData: keepPreviousData,
+    placeholderData: (prev) => prev,
   });
 
-  const movies = data?.results ?? [];
-  const totalPages = data?.total_pages ?? 0;
-
-  useEffect(() => {
-    if (isSuccess && movies.length === 0) {
-      toast("No movies found for your request.", { icon: "😞" });
+  const handleSearch = (newQuery: string) => {
+    if (newQuery !== query) {
+      setQuery(newQuery);
+      setPage(1); // reset page on new search
     }
-  }, [isSuccess, movies]);
+  };
 
-  // Background image preload
-  const bgQuery = useQuery({
-    queryKey: ["backdrop"],
-    queryFn: getRandomBackdropUrl,
-    enabled: movies.length === 0,
-    refetchInterval: 8000,
-  });
+  const closeModal = () => setActiveMovie(null);
 
+  // Фонове зображення, якщо немає пошуку
   useEffect(() => {
-    if (!bgQuery.data) return;
-    const img = new Image();
-    img.src = bgQuery.data;
-    img.onload = () => setBackgroundUrl(bgQuery.data);
-  }, [bgQuery.data]);
+    if (!query) {
+      getRandomBackdropUrl()
+        .then((url) => {
+          const img = new Image();
+          img.src = url ?? '';
+          img.onload = () => setBackdrop(url);
+        })
+        .catch((err) => console.warn('Backdrop error:', err));
+    }
+  }, [query]);
+
+  // Toast при відсутності результатів
+  useEffect(() => {
+    if (data?.results.length === 0) {
+      toast('No movies found.', { icon: '🎬' });
+    }
+  }, [data]);
 
   return (
-    <>
+    <div className={css.appContainer}>
       <Toaster />
+      <SearchBar onSubmit={handleSearch} defaultValue={query} />
 
-      {isLoading && <Loader />}
+      {isPending && <Loader />}
+      <RandomBackdrop bgUrl={backdrop} />
 
-      <SearchBar onSubmit={(query) => {
-        setQuery(query);
-        setCurrentPage(1);
-      }} />
-
-      {query && isError && <ErrorMessage />}
-
-      {query && movies.length > 0 ? (
-        <section className={css.gallerySection}>
-          {totalPages > 1 && (
-            <ReactPaginate
-              pageCount={totalPages}
-              pageRangeDisplayed={5}
-              marginPagesDisplayed={1}
-              onPageChange={({ selected }) => setCurrentPage(selected + 1)}
-              forcePage={currentPage - 1}
-              containerClassName={css.pagination}
-              activeClassName={css.active}
-              nextLabel="→"
-              previousLabel="←"
-            />
-          )}
-
-          <MovieGrid
-            movies={movies}
-            onSelect={(movie) => setSelectedMovie(movie)}
-          />
-        </section>
+      {isError ? (
+        <ErrorMessage />
       ) : (
         <>
-          <MainHeader />
-          {backgroundUrl && <RandomBackdrop bgUrl={backgroundUrl} />}
+          {data && (
+            <>
+              <MovieGrid movies={data.results} onSelect={setActiveMovie} />
+
+              {data.total_pages > 1 && (
+                <ReactPaginate
+                  pageCount={data.total_pages}
+                  pageRangeDisplayed={5}
+                  marginPagesDisplayed={1}
+                  onPageChange={({ selected }) => setPage(selected + 1)}
+                  forcePage={page - 1}
+                  containerClassName={css.pagination}
+                  activeClassName={css.active}
+                  nextLabel="→"
+                  previousLabel="←"
+                />
+              )}
+            </>
+          )}
         </>
       )}
 
-      {selectedMovie && (
-        <MovieModal
-          movie={selectedMovie}
-          onClose={() => setSelectedMovie(null)}
-        />
-      )}
-    </>
+      {activeMovie && <MovieModal movie={activeMovie} onClose={closeModal} />}
+    </div>
   );
 }
